@@ -51,4 +51,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class);
     }
+
+    // Полное имя пользователя
+    public function getFullNameAttribute()
+    {
+        return trim("{$this->surname} {$this->name} {$this->patronymic}");
+    }
 }
