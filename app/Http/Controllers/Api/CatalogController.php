@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Product;
-use App\Models\Category;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedFilter;
 
 class CatalogController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         $products = QueryBuilder::for(Product::class)
             ->allowedFilters([
@@ -24,17 +24,8 @@ class CatalogController extends Controller
             ])
             ->allowedSorts(['name', 'price', 'year'])
             ->with('category')
-            ->paginate(12)
-            ->withQueryString();
+            ->paginate(12);
 
-        $categories = Category::all();
-
-        return view('catalog.index', compact('products', 'categories'));
-    }
-
-    public function show(Product $product)
-    {
-        $product->load('category');
-        return view('catalog.show', compact('product'));
+        return response()->json($products);
     }
 } 

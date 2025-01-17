@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
 {
@@ -14,29 +16,51 @@ class RegisterController extends Controller
         return view('auth.register');
     }
 
+    protected function create(array $data)
+    {
+        return User::create([
+            'name' => $data['name'],
+            'surname' => $data['surname'],
+            'patronymic' => $data['patronymic'],
+            'login' => $data['login'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
+    }
+
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => ['required', 'regex:/^[А-Яа-яЁё\s-]+$/u'],
-            'surname' => ['required', 'regex:/^[А-Яа-яЁё\s-]+$/u'],
-            'patronymic' => ['nullable', 'regex:/^[А-Яа-яЁё\s-]+$/u'],
-            'login' => ['required', 'unique:users', 'regex:/^[A-Za-z0-9-]+$/'],
-            'email' => ['required', 'email', 'unique:users'],
-            'password' => ['required', 'min:6', 'confirmed'],
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:255', 'regex:/^[А-Яа-яЁё\s-]+$/u'],
+            'surname' => ['required', 'string', 'max:255', 'regex:/^[А-Яа-яЁё\s-]+$/u'],
+            'patronymic' => ['nullable', 'string', 'max:255', 'regex:/^[А-Яа-яЁё\s-]+$/u'],
+            'login' => ['required', 'string', 'max:255', 'unique:users', 'regex:/^[a-zA-Z0-9_-]+$/'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'rules' => ['required', 'accepted'],
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'surname' => $request->surname,
-            'patronymic' => $request->patronymic,
-            'login' => $request->login,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        if ($validator->fails()) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
-        auth()->login($user);
-        
-        return redirect('/')->with('success', 'Регистрация успешно завершена!');
+        $user = $this->create($request->all());
+
+        Auth::login($user);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'redirect' => route('home')
+            ]);
+        }
+
+        return redirect()->route('home');
     }
 } 

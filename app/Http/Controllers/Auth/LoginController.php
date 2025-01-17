@@ -21,21 +21,32 @@ class LoginController extends Controller
         ]);
 
         $loginType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'login';
-        $credentials = [
-            $loginType => $request->email,
-            'password' => $request->password
-        ];
+        $credentials[$loginType] = $credentials['email'];
+        unset($credentials['email']);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended('/');
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'redirect' => route('home')
+                ]);
+            }
+
+            return redirect()->intended(route('home'));
         }
 
-        return back()
-            ->withInput($request->only('email', 'remember'))
-            ->withErrors([
-                'email' => 'Предоставленные учетные данные не соответствуют нашим записям.',
-            ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'errors' => [
+                    'email' => ['Неверный логин/email или пароль']
+                ]
+            ], 422);
+        }
+
+        return back()->withErrors([
+            'email' => 'Неверный логин/email или пароль',
+        ])->onlyInput('email');
     }
 
     public function logout(Request $request)
@@ -43,6 +54,11 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/');
+
+        if ($request->wantsJson()) {
+            return response()->json(['redirect' => route('login')]);
+        }
+
+        return redirect()->route('login');
     }
 } 
