@@ -8,8 +8,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
+use Gloudemans\Shoppingcart\CanBeBought;
+use Gloudemans\Shoppingcart\Contracts\Buyable;
+use Gloudemans\Shoppingcart\Facades\Cart;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -45,6 +50,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'role' => 'string',
     ];
 
     public function orders(): HasMany
@@ -56,5 +62,42 @@ class User extends Authenticatable
     public function getFullNameAttribute()
     {
         return trim("{$this->surname} {$this->name} {$this->patronymic}");
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Получить активную корзину пользователя
+     */
+    public function cart()
+    {
+        return Cart::session($this->id);
+    }
+
+    /**
+     * Очистить корзину пользователя
+     */
+    public function clearCart()
+    {
+        return $this->cart()->clear();
+    }
+
+    /**
+     * Получить содержимое корзины
+     */
+    public function getCartContent()
+    {
+        return $this->cart()->getContent();
+    }
+
+    /**
+     * Получить общую сумму корзины
+     */
+    public function getCartTotal()
+    {
+        return $this->cart()->getTotal();
     }
 }

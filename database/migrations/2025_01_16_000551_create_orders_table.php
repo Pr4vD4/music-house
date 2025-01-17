@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('status', ['new', 'confirmed', 'cancelled'])->default('new');
+            $table->enum('status', ['new', 'processing', 'completed', 'cancelled'])->default('new');
+            $table->decimal('total_amount', 10, 2);
             $table->text('rejection_reason')->nullable();
             $table->timestamps();
         });

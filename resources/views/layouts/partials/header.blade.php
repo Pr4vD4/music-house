@@ -12,7 +12,8 @@
 
         <div class="flex items-center space-x-4">
             @auth
-                <a href="{{ route('cart') }}" class="text-gray-600 hover:text-gray-900">Корзина</a>
+                <a href="{{ route('cart.index') }}" class="text-gray-600 hover:text-gray-900">Корзина</a>
+                <a href="{{ route('orders.index') }}" class="text-gray-600 hover:text-gray-900">Мои заказы</a>
                 <form action="{{ route('logout') }}" method="POST" class="inline">
                     @csrf
                     <button type="submit" class="text-gray-600 hover:text-gray-900">Выход</button>

@@ -7,6 +7,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,8 +36,16 @@ Route::middleware('guest')->group(function () {
 
 // Корзина (только для авторизованных)
 Route::middleware('auth')->group(function () {
-    Route::get('/cart', [CartController::class, 'index'])->name('cart');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
+    Route::delete('/cart/remove/{rowId}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::patch('/cart/update/{rowId}', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+
+    // Маршруты для заказов
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
 });
