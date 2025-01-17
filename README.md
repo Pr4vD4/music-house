@@ -1,5 +1,19 @@
 # Dual Task Project
 
+## Используемые технологии
+
+### Backend
+- Laravel 10.x - PHP фреймворк
+- Filament 3.x - Админ-панель и панель управления
+- Laravel Shopping Cart - Система корзины покупок
+- MySQL - База данных
+
+### Frontend
+- Blade - Шаблонизатор
+- Tailwind CSS - Утилитарный CSS фреймворк
+- Alpine.js - JavaScript фреймворк
+- Heroicons - Набор иконок
+
 ## Требования
 - PHP 8.1 или выше
 - Composer
